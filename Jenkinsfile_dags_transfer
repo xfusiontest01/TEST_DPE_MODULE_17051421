@@ -1,0 +1,21 @@
+node {
+  def app
+  def ecsService = 'is-wso2'
+  def ecsCluster = 'DEV-gdsm-webapp'
+  def region = 'us-west-2'
+  
+  try{
+      
+      //notify('Started')
+        
+      stage 'SCM Checkout'
+        git branch: 'main', credentialsId: 'xf-pipeline-git-token', url: 'https://github.com/xfusiontest01/TEST_DPE_MODULE.git'
+      stage 'DAGs backup, transfer'
+        sshPublisher(publishers: [sshPublisherDesc(configName: 'dev-airflow', transfers: [sshTransfer(cleanRemote: true, excludes: '', execCommand: 'tar -cvf /tmp/airflow-dags-backup-`date +%d-%m-%Y_%H%M%S`.tar /home/ec2-user/xf-airflow-docker/dags/; sudo \\cp -r /var/tmp/xaqua-airflow-config/generatedDAG/* /home/ec2-user/xf-airflow-docker/dags/', execTimeout: 120000, flatten: false, makeEmptyDirs: true, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: 'xaqua-airflow-config', remoteDirectorySDF: false, removePrefix: '', sourceFiles: 'generatedDAG/**')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
+
+
+  } catch(err) {
+      notify("Error ${err}")
+      currentBuild.result = 'FAILURE'
+  }
+}
